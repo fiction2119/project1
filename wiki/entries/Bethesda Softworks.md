@@ -1,0 +1,1 @@
+Bethesda is an AAA gaming developer, owned by Microsoft.
