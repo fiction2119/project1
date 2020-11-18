@@ -2,6 +2,7 @@ from django import forms
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.urls import reverse
+from python.random import randint
 from . import util
 
 class NewTitleForm(forms.Form):
@@ -65,7 +66,11 @@ def search(request):
         return HttpResponseRedirect(reverse("encyclopedia:index"))    
 
 def edit(request):
-    return render(request, "encyclopedia/edit.html", {
-        "entry": util.get_entry("entry"),
-    })
+    if request.method == "POST":
+       request.POST.get()
+
+def random(request):
+    entries = util.list_entries()
+    random = entries[randint(0, len(entries))]
+    
 

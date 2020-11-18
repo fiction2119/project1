@@ -9,7 +9,7 @@
     <form action="{% url 'encyclopedia:edit'%}" method="POST">
         {% csrf_token %}
         {{form}}
-        <textarea name="content" rows="5" cols="50">
+        <textarea name="content" rows="5" cols="50" value="">
         
         </textarea>
         <input type="submit">
