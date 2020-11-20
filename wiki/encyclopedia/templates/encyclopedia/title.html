@@ -6,9 +6,9 @@
 
 {% block body %}
 
-    <h1>{{name}}</h1>
+    <div>{{name}}</div>
     
-    <a href="encyclopedia/edit.html">Edit</a>
+    <a href="{% url 'encyclopedia:edit' %}">Edit</a>
 
     
 

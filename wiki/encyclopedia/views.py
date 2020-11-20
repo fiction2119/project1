@@ -2,11 +2,12 @@ from django import forms
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.urls import reverse
-from python.random import randint
+from markdown2 import Markdown
 from . import util
 
 class NewTitleForm(forms.Form):
-    title = forms.CharField(label="New Title")
+    title = forms.CharField(label="Title")
+    content = forms.CharField(label="Content", widget=forms.Textarea)
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
@@ -14,8 +15,11 @@ def index(request):
     })
 
 def title(request, name):
+    markdown = Markdown()
+    markdown = markdown.convert(util.get_entry(name))
+
     return render(request, "encyclopedia/title.html", {
-        "name": util.get_entry(name),
+        "name": markdown,
     })
 
 def add(request):
@@ -25,6 +29,7 @@ def add(request):
         content = request.POST.get("content")
         if form.is_valid():
             title = form.cleaned_data["title"]
+            content = form.cleaned_data["content"]
             if title in util.list_entries():
                 return HttpResponseNotFound("Error: Entry already exists.")
             else:
@@ -37,6 +42,7 @@ def add(request):
     else:
         return render(request, "encyclopedia/add.html", {
             "form":NewTitleForm(),
+            "title":title
         })
 
 def search(request):
@@ -67,10 +73,23 @@ def search(request):
 
 def edit(request):
     if request.method == "POST":
-       request.POST.get()
+       form = NewTitleForm(request.POST)
+       title = request.POST.get("title")
+       content = request.POST.get("content")
+       if title.is_valid() and content.is_valid():
+           content = form.cleaned_data["content"]
+           title = form.cleaned_data["title"]
+
+           if title in util.list_entries():
+                util.save_entry(title, content)
+           else:
+               return HttpResponseNotFound("Error: Entry doesn't exist.")
+
+    else:
+        return render(request, "encyclopedia/edit.html")
 
 def random(request):
     entries = util.list_entries()
-    random = entries[randint(0, len(entries))]
+    #random = entries[randint(0, len(entries))]
     
 
