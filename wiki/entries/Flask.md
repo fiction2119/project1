@@ -1,1 +1,0 @@
-Flask is a lightweight version of django.

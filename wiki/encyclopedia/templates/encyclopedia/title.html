@@ -6,7 +6,7 @@
 
 {% block body %}
 
-    <div>{{name}}</div>
+    <div>{{name|safe}}</div>
     
     <a href="{% url 'encyclopedia:edit' %}">Edit</a>
 

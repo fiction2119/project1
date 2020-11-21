@@ -1,1 +1,0 @@
-Joe Biden is the 46th President of USA

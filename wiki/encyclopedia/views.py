@@ -5,6 +5,8 @@ from django.urls import reverse
 from markdown2 import Markdown
 from . import util
 
+markdowner = Markdown()
+
 class NewTitleForm(forms.Form):
     title = forms.CharField(label="Title")
     content = forms.CharField(label="Content", widget=forms.Textarea)
@@ -15,8 +17,7 @@ def index(request):
     })
 
 def title(request, name):
-    markdown = Markdown()
-    markdown = markdown.convert(util.get_entry(name))
+    markdown = markdowner.convert(util.get_entry(name))
 
     return render(request, "encyclopedia/title.html", {
         "name": markdown,
@@ -42,7 +43,6 @@ def add(request):
     else:
         return render(request, "encyclopedia/add.html", {
             "form":NewTitleForm(),
-            "title":title
         })
 
 def search(request):
@@ -71,7 +71,7 @@ def search(request):
     else:
         return HttpResponseRedirect(reverse("encyclopedia:index"))    
 
-def edit(request):
+def edit(request, name):
     if request.method == "POST":
        form = NewTitleForm(request.POST)
        title = request.POST.get("title")
@@ -86,10 +86,7 @@ def edit(request):
                return HttpResponseNotFound("Error: Entry doesn't exist.")
 
     else:
-        return render(request, "encyclopedia/edit.html")
-
-def random(request):
-    entries = util.list_entries()
-    #random = entries[randint(0, len(entries))]
-    
-
+        return render(request, "encyclopedia/edit.html", {
+            "form":NewTitleForm(),
+            "name":name,
+        }) 

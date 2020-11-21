@@ -1,1 +1,0 @@
-A technology which purpose is to store data.
