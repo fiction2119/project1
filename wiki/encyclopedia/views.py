@@ -7,13 +7,23 @@ from . import util
 
 markdowner = Markdown()
 
-class NewTitleForm(forms.Form):
+class EditForm(forms.Form):
+    title = forms.CharField(label="Title")
+    content = forms.CharField(label="Content", widget=forms.Textarea)
+
+class NewForm(forms.Form):
     title = forms.CharField(label="Title")
     content = forms.CharField(label="Content", widget=forms.Textarea)
 
 def index(request):
+    if "titles" not in request.session:
+        request.session["titles"] = []
+        for title in util.list_entries():
+            if title not in request.session["titles"]:
+                request.session["titles"].append(title)
+
     return render(request, "encyclopedia/index.html", {
-        "entries": util.list_entries()
+        "entries": request.session["titles"]
     })
 
 def title(request, name):
@@ -25,7 +35,7 @@ def title(request, name):
 
 def add(request):
     if request.method == "POST":
-        form = NewTitleForm(request.POST)
+        form = NewForm(request.POST)
         title = request.POST.get("title")
         content = request.POST.get("content")
         if form.is_valid():
@@ -35,6 +45,7 @@ def add(request):
                 return HttpResponseNotFound("Error: Entry already exists.")
             else:
                 util.save_entry(title, content)
+                request.session["titles"] += [title]
                 return render(request, "encyclopedia/index.html", {
                     "entries": util.list_entries()
                 })
@@ -42,7 +53,7 @@ def add(request):
             return HttpResponseNotFound("Error: Form isn't valid.")
     else:
         return render(request, "encyclopedia/add.html", {
-            "form":NewTitleForm(),
+            "form":NewForm(),
         })
 
 def search(request):
@@ -71,22 +82,6 @@ def search(request):
     else:
         return HttpResponseRedirect(reverse("encyclopedia:index"))    
 
-def edit(request, name):
+def edit(request):
     if request.method == "POST":
-       form = NewTitleForm(request.POST)
-       title = request.POST.get("title")
-       content = request.POST.get("content")
-       if title.is_valid() and content.is_valid():
-           content = form.cleaned_data["content"]
-           title = form.cleaned_data["title"]
-
-           if title in util.list_entries():
-                util.save_entry(title, content)
-           else:
-               return HttpResponseNotFound("Error: Entry doesn't exist.")
-
-    else:
-        return render(request, "encyclopedia/edit.html", {
-            "form":NewTitleForm(),
-            "name":name,
-        }) 
+        form = EditForm(request.POST)

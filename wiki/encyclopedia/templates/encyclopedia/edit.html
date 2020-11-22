@@ -6,10 +6,10 @@
 
 {% block body %}
 
-    <form action="{% url 'encyclopedia:edit' %}" method="post" value="myform">
+    <form action="{% url 'encyclopedia:edit' %}" method="post">
         {% csrf_token %}
         {{form}}
-        <input type="submit">
+        <input type="submit" value="Apply Changes">
     </form>
 
 
