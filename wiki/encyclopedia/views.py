@@ -8,8 +8,7 @@ from . import util
 markdowner = Markdown()
 
 class EditForm(forms.Form):
-    title = forms.CharField(label="Title")
-    content = forms.CharField(label="Content", widget=forms.Textarea)
+    content = forms.CharField(widget=forms.Textarea)
 
 class NewForm(forms.Form):
     title = forms.CharField(label="Title")
@@ -28,6 +27,8 @@ def index(request):
 
 def title(request, name):
     markdown = markdowner.convert(util.get_entry(name))
+    request.session["edit_content"] = util.get_entry(name)
+    request.session["title"] = name
 
     return render(request, "encyclopedia/title.html", {
         "name": markdown,
@@ -83,5 +84,21 @@ def search(request):
         return HttpResponseRedirect(reverse("encyclopedia:index"))    
 
 def edit(request):
+    title = request.session["title"]
+    content = request.session["edit_content"]
     if request.method == "POST":
         form = EditForm(request.POST)
+        if form.is_valid:
+            util.save_entry(title, content)
+            return render(request, "encyclopedia/title.html", {
+                "name": markdowner.convert(util.get_entry(title)),
+            })
+        else:
+            return HttpResponseNotFound("Error: Form isn't valid.")
+
+
+    return render(request, "encyclopedia/edit.html", {
+        "form": EditForm(initial={'content': content}),
+    
+    })
+        
