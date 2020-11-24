@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.urls import reverse
 from markdown2 import Markdown
+from random import randint
 from . import util
 
 markdowner = Markdown()
@@ -19,10 +20,12 @@ def index(request):
         request.session["titles"] = []
         for title in util.list_entries():
             if title not in request.session["titles"]:
-                request.session["titles"].append(title)
+                if util.get_entry(title) != None:
+                    request.session["titles"].append(title)
+            
 
     return render(request, "encyclopedia/index.html", {
-        "entries": request.session["titles"]
+        "entries": util.list_entries(),
     })
 
 def title(request, name):
@@ -88,7 +91,8 @@ def edit(request):
     content = request.session["edit_content"]
     if request.method == "POST":
         form = EditForm(request.POST)
-        if form.is_valid:
+        if form.is_valid():
+            content = form.cleaned_data["content"]
             util.save_entry(title, content)
             return render(request, "encyclopedia/title.html", {
                 "name": markdowner.convert(util.get_entry(title)),
@@ -99,6 +103,19 @@ def edit(request):
 
     return render(request, "encyclopedia/edit.html", {
         "form": EditForm(initial={'content': content}),
-    
+
     })
-        
+
+def random(request):
+    
+    length = len(util.list_entries()) 
+    random = randint(0, (length - 1))
+    title = util.list_entries()
+    random_title = title[random]
+    final = markdowner.convert(util.get_entry(random_title))
+
+    return render(request, "encyclopedia/title.html", {
+        "name": final,
+    })
+    
+
