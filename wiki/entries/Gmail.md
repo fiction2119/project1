@@ -1,1 +1,3 @@
-Google mail platform
+# Gmail
+
+Is a mail website created by Google
